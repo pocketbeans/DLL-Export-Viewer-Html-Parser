@@ -1,5 +1,5 @@
-# DLL-Export-Viewer-Html-Parser
-Parses .html file output of DLL Export Viewer, which can then be used to create a proxy DLL.
+# DLL Export Viewer - Html-Parser
+Parses .html file output of DLL Export Viewer, which can then be used to create a proxy DLL for DLL hijacking.
 
 # Usage
 Use DLL Export Viewer to generate an html report of any DLL. Pass the html file to the python script and copy the return into your DLL project.
