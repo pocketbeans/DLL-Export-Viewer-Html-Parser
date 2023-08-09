@@ -1,5 +1,6 @@
 import argparse
 import re
+from bs4 import BeautifulSoup
 
 def main():
     '''Parse DLL Export Viewer .html output and print linkers to add to DLL proxy file'''
@@ -10,24 +11,23 @@ def main():
     report = args.report
 
     try:
-        f = open(report)
-        page = f.readlines()
-        f.close()
+        with open(report) as fp:
+            soup = BeautifulSoup(fp, "html.parser")
     except:
         print("[-] ERROR: open('%s')" % report)
         return
 
-    
-    fname_pat = r"\">(\w+)<\/td>"
-    ordinal_pat = r"([0-9]+)\s"
-    dllname_pat = r"\w+\.dll"
-    for line in page:
-        if '.dll' in line:
-            function_name = re.search(fname_pat, line).group(1)
-            ordinal = re.search(ordinal_pat, line).group(1)
-            dll_name = re.findall(dllname_pat, line)[0].split('.')[0]
-            dll_rename = dll_name + "_orig"
-            print("#pragma comment(linker,\"/export:%s=%s.%s,@%s\")" % (function_name, dll_rename, function_name, ordinal))
+
+    table = soup.find("table")
+
+    for row in table.find_all("tr")[1:]:
+        col = row.find_all("td")
+        function_name = col[0].text
+        ordinal = col[3].text.split(" ")[0]
+        dll_name = col[4].text.split('.dll')[0]
+        dll_rename = dll_name + "_orig"
+        print("#pragma comment(linker,\"/export:%s=%s.%s,@%s\")" % (function_name, dll_rename, function_name, ordinal))
+  
 
 if __name__ == '__main__':
     main()
